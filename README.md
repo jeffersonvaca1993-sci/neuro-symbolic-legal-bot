@@ -1,58 +1,48 @@
-De acuerdo. Aquí tiene un archivo `README.md` que detalla los objetivos y la lógica de la arquitectura completa que hemos diseñado. Este documento puede servir como la memoria técnica y el plano maestro de su proyecto.
-
----
 # Proyecto: Asistente Conversacional para Consultorio Jurídico
+
+> [!IMPORTANT]
+> ⚠️ **Estado del Proyecto: Prueba de Concepto (PoC) / Architecture Sandbox**
+> Este repositorio no está diseñado como un producto final (Drop-in replacement) para producción inmediata. Funciona como un Laboratorio de Arquitectura donde se diseñaron y validaron paradigmas de ingeniería para sistemas de IA compuestos (Compound AI Systems).
 
 **Versión:** 1.0
 **Fecha:** 10 de julio de 2025
 
-## 1. Objetivo del Proyecto
+## 1. El Reto Arquitectónico
 
-El objetivo principal de este proyecto es construir un asistente conversacional avanzado y escalable para un consultorio jurídico. El asistente está diseñado para cumplir dos funciones estratégicas:
+En entornos críticos como el sector jurídico, los Modelos de Lenguaje Grandes (LLMs) puros presentan un riesgo inaceptable debido a las "alucinaciones" y su incapacidad para garantizar el cumplimiento estricto de procesos transaccionales (ej. validación de identidad obligatoria antes de un trámite).
 
-1.  **Optimizar la Interacción con el Cliente (Fase 1):** Ofrecer un canal de comunicación eficiente y amigable, capaz de recolectar información, validar datos de identidad y guiar a los usuarios a través de los servicios ofrecidos, manteniendo siempre un tono profesional y personalizado.
-2.  **Automatizar Procesos Internos (Fase 2):** Servir como el punto de entrada para flujos de trabajo de backend (orquestados por n8n), como la generación de expedientes, la redacción de documentos y el envío de notificaciones, basándose en la información recolectada durante la conversación.
+El objetivo de este diseño es validar una Arquitectura Neuro-Simbólica capaz de:
 
-## 2. Arquitectura General
+* Garantizar cero alucinaciones en la ruta crítica mediante enrutamiento determinista.
+* Mantener una experiencia de usuario empática y flexible delegando el manejo de excepciones a IA Generativa.
+* Orquestar automatizaciones de backend (generación de expedientes) de forma asíncrona.
 
-El sistema se basa en una arquitectura híbrida y desacoplada, donde cada herramienta cumple un rol especializado:
+## 2. Paradigma de Diseño: Sistema Híbrido y Desacoplado
 
-* **Rasa Open Source (El Núcleo Conversacional):** Actúa como el cerebro principal que gestiona el flujo del diálogo. Su responsabilidad es entender la intención del usuario, mantener el estado de la conversación y ejecutar la lógica de negocio inmediata.
-* **Gemma/LLM (El Experto Lingüístico):** No controla la conversación, sino que es un especialista consultado por Rasa para tareas específicas que requieren generación de lenguaje natural avanzado. Su rol principal en esta arquitectura es el **Fallback Inteligente**, donde genera respuestas empáticas y contextuales cuando el bot no entiende al usuario.
-* **Base de Datos Externa (La Memoria a Largo Plazo):** Un componente crucial para la persistencia. Almacena el estado de los trámites, permitiendo a los usuarios pausar y reanudar procesos complejos entre sesiones y al bot consultar el estado de un trámite en curso.
-* **n8n (El Motor de Procesos de Backend):** Se activa mediante webhooks desde Rasa para orquestar tareas asíncronas y complejas que no requieren interacción directa con el usuario (ej. crear un PDF, enviar 5 correos, actualizar un CRM).
+El sistema se basa en una separación estricta de responsabilidades, donde cada componente cumple un rol especializado:
 
-## 3. Lógica de la Conversación (El Flujo del Usuario)
+* **El Núcleo Determinista (Rasa Open Source):** Actúa como el cerebro transaccional (DIETClassifier, RulePolicy). Su responsabilidad exclusiva es entender la intención principal, extraer entidades clave (cédulas, nombres), mantener la máquina de estados y forzar la ejecución de la lógica de negocio sin desviaciones.
+* **El Fallback Inteligente (Gemma / LLM Injection):** El LLM no controla la conversación. Se utiliza como un "Especialista Lingüístico" de rescate. Cuando el NLU de Rasa detecta baja confianza (ambigüedad), inyecta el contexto de la sesión al LLM para que este genere una respuesta empática que redirija al usuario suavemente hacia el flujo estricto (Error Recovery).
+* **Persistencia de Estado (External DB):** Almacenamiento del estado de los trámites, permitiendo pausar y reanudar flujos complejos entre sesiones (resiliencia de sesión).
+* **Motor de Procesos (n8n):** Activado mediante webhooks asíncronos desde el Action Server para orquestar tareas pesadas de backend que no requieren bloqueo de la interfaz de usuario (ej. creación de PDFs, envíos de correo).
 
-La experiencia del usuario está diseñada para ser fluida, cíclica y respetuosa, operando en dos modos principales.
+## 3. Modularidad en la Capa de Lógica (Action Server)
 
-1.  **Bienvenida y Personalización:** Toda conversación inicia con un saludo y una petición **opcional** de un apodo. Esto establece un tono amigable desde el primer momento sin crear una barrera para el usuario.
-2.  **Menú de Servicios (El Centro de Mando):** Inmediatamente después, el bot presenta proactivamente los servicios disponibles mediante botones. En este punto, el usuario puede entrar en:
-    * **Modo Informativo:** Realizar preguntas generales (`ask_general_info`) sin necesidad de identificarse.
-    * **Modo Transaccional:** Seleccionar un trámite específico (`request_service`).
-3.  **Ejecución de un Trámite:** Al seleccionar un trámite, se activa la lógica de negocio correspondiente. Es aquí donde se solicita la información obligatoria (como la cédula).
-4.  **Ciclo Conversacional:** Una vez finalizado un trámite o una consulta, el bot no termina la conversación, sino que vuelve al "Centro de Mando", preguntando proactivamente "¿En qué más puedo ayudarle?" y mostrando de nuevo las opciones. Esto permite al usuario realizar múltiples trámites para sí mismo o para otros en una sola sesión.
+El corazón técnico de la escalabilidad de este proyecto reside en su arquitectura de software modular para las acciones personalizadas:
 
-## 4. El Paradigma de Diseño: Arquitectura Modular
+* **Principio de Diseño:** Agrupación por Funcionalidad de Negocio (Trámite), no por Tipo de Archivo.
+* **Orquestadores (`actions/tramites/<tramite>.py`):** Cada servicio legal posee una acción principal que actúa como director. Contiene la "receta" estricta de pasos requeridos.
+* **Componentes Reutilizables (`actions/tramites/components/`):** Tareas comunes (como la validación criptográfica o de formato de una cédula de identidad) se encapsulan en formularios y acciones atómicas. Los orquestadores invocan estos componentes evitando la duplicación de código (ej. un trámite de residencia grupal invoca el validador de identidad iterativamente en un bucle).
 
-El corazón técnico del proyecto es su arquitectura de software modular, aplicada a los datos, la lógica de acciones y el dominio.
+## 4. Gestión del Flujo Conversacional (State Machine)
 
-* **Principio:** Agrupación por **Funcionalidad (Trámite)**, no por Tipo de Archivo.
-* **Orquestadores (`actions/tramites/<tramite>.py`):** Cada servicio (ej. `residencia_grupal`) tiene una acción principal en Python que actúa como "director de orquesta". Esta acción contiene la "receta" única de pasos para ese trámite.
-* **Componentes Reutilizables (`actions/tramites/components/`):** Tareas comunes, como la validación de una cédula, se encapsulan en sus propios formularios y acciones. Los orquestadores pueden llamar a estos componentes según sea necesario, evitando la duplicación de código. Por ejemplo, el orquestador `residencia_grupal` llama al componente `identity_validation_form` varias veces dentro de un bucle.
-* **Estructura de Archivos Consistente:** Las carpetas `data`, `domain` y `actions` siguen esta misma estructura modular, haciendo que añadir, modificar o depurar un trámite sea un proceso aislado y seguro.
+La experiencia del usuario se modeló como un ciclo transaccional continuo:
 
-## 5. Manejo de Errores y Flexibilidad
+* **Soft Onboarding:** Saludo y petición opcional de apodo para reducir la fricción inicial.
+* **Centro de Mando (Routing):** Presentación proactiva de servicios. Bifurcación entre el Modo Informativo (RAG/FAQ sin estado) y el Modo Transaccional (ejecución de Forms estrictos).
+* **Retención de Ciclo:** Al finalizar un trámite, la máquina de estados no finaliza la sesión abruptamente, sino que re-enruta al "Centro de Mando" para incentivar transacciones múltiples en la misma sesión.
 
-El sistema está diseñado para ser robusto y manejar la incertidumbre.
-
-* **Fallback Inteligente:** Cuando el NLU de Rasa no entiende al usuario con suficiente confianza, no da una respuesta genérica. En su lugar, se activa una regla que llama a la acción `custom_ask_affirmation`. Esta acción:
-    1.  Recolecta el contexto completo de la conversación (historial, formulario activo).
-    2.  Envía este contexto a Gemma/LLM con la misión de generar una respuesta empática.
-    3.  La respuesta de Gemma reconoce la posible intención del usuario y lo redirige suavemente a la tarea que el bot estaba intentando realizar, creando una recuperación de errores muy natural.
-* **Pausa y Reanudación (Habilitado por Diseño):** La arquitectura con una base de datos externa permite implementar fácilmente la capacidad de pausar trámites largos (ej. si un usuario no tiene un documento a mano) y reanudarlos más tarde, incluso en una sesión diferente, ya que el estado se conserva en la base de datos y no solo en la memoria del bot.
-
-
+---
 # El entrenamiento se realiza con 
 
 docker-compose run --rm rasa data validate --domain domain
