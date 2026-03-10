@@ -1,0 +1,15 @@
+# Contenido para data/tramites/common_components/nlu_identity.yml
+version: "3.1"
+
+nlu:
+# Intención para cuando el usuario proporciona su número de cédula.
+# El objetivo principal es extraer la entidad `cedula_ec`.
+- intent: provide_cedula
+  examples: |
+    - mi cédula es [1712345678](cedula_ec)
+    - es [17 2345 678 9](cedula_ec)
+    - aquí la tienes: [09-8765-4321](cedula_ec)
+    - [0102030405](cedula_ec)
+    - te doy el número [180102030-4](cedula_ec)
+    - [172358964-2](cedula_ec)
+    - el número es [0504030201](cedula_ec)

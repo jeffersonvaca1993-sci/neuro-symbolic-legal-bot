@@ -1,0 +1,20 @@
+# Contenido para domain/tramites/residencia_individual.yml
+version: "3.1"
+
+# --- Elementos Específicos del Trámite de Residencia Individual ---
+
+# Lista la acción orquestadora principal para este trámite.
+actions:
+- residencia_individual
+
+# Slots que solo se usan durante este trámite específico.
+slots:
+  # Ejemplo: Un slot para guardar el tipo de visa que el usuario solicita.
+  residencia_tipo_visa:
+    type: text
+    mappings: [{type: custom}]
+
+# Respuestas que solo tienen sentido en el contexto de este trámite.
+responses:
+  utter_ask_tipo_visa:
+    - text: "Perfecto. Para la residencia individual, ¿qué tipo de visa está solicitando?"

@@ -1,0 +1,18 @@
+.rasa/
+models/
+.cache/
+.config/
+.keras/
+venv/
+.venv/
+__pycache__/
+*.log
+.env
+.vscode/
+.idea/
+index - copia.html
+LansarPowerShel.bat
+*.pyc
+*.pyo
+db.sqlite3
+.DS_Store

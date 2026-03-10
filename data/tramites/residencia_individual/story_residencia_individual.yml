@@ -1,0 +1,27 @@
+# Contenido para: data/tramites/residencia_individual/story_residencia_individual.yml
+version: "3.1"
+
+stories:
+- story: Flujo completo y exitoso de residencia individual
+  steps:
+  # 1. El usuario inicia el trámite
+  - intent: request_service
+    entities:
+    - service_type: "residencia individual"
+  
+  # 2. La acción orquestadora se ejecuta y activa el formulario
+  - action: residencia_individual
+  - active_loop: identity_validation_form
+
+  # 3. El usuario proporciona su cédula
+  - intent: provide_cedula
+    entities:
+    - cedula_ec: "1723589642" # Ejemplo
+
+  # 4. El formulario se ejecuta, valida y se desactiva
+  - action: identity_validation_form
+  - active_loop: null
+
+  # 5. El bot confirma la finalización del trámite y pregunta qué más hacer
+  - action: utter_tramite_completed
+  - action: utter_what_else

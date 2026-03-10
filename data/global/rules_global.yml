@@ -1,0 +1,35 @@
+# Contenido para data/global/rules_global.yml
+
+version: "3.1"
+rules:
+
+# ESTA ES LA REGLA CORREGIDA
+- rule: Saludar y pedir apodo al iniciar
+  condition:
+  # La regla solo se activará si el slot del apodo está vacío (es el inicio de la conversación).
+  - slot_was_set:
+    - slot_nickname: null
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - action: utter_ask_nickname
+
+- rule: Confirmar apodo y ofrecer servicios
+  condition:
+  - active_loop: null
+  steps:
+  - intent: inform
+    entities:
+    - nickname
+  - action: utter_confirm_nickname
+  - action: utter_offer_services
+
+- rule: Responder a preguntas de información general
+  steps:
+  - intent: ask_general_info
+  - action: utter_list_services
+
+- rule: Activar fallback inteligente
+  steps:
+  - intent: nlu_fallback
+  - action: custom_ask_affirmation

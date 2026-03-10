@@ -1,0 +1,73 @@
+# Contenido para data/global/nlu_global.yml
+
+version: "3.1"
+nlu:
+# --- Intenciones Básicas de Conversación ---
+- intent: greet
+  examples: |
+    - hola
+    - buenos días
+    - qué tal
+    - buenas tardes
+
+- intent: goodbye
+  examples: |
+    - adiós
+    - hasta luego
+    - chao
+
+- intent: affirm
+  examples: |
+    - sí
+    - de acuerdo
+    - correcto
+    - afirmativo
+
+- intent: deny
+  examples: |
+    - no
+    - para nada
+    - negativo
+    - cancelar
+
+# --- Intenciones de Información y Navegación (Unificadas) ---
+- intent: inform
+  examples: |
+    # Ejemplos que antes eran de 'provide_nickname'
+    - puedes llamarme [Juan](nickname)
+    - me llamo [Ana](nickname)
+    - soy [Carlos](nickname)
+    - mi nombre es [María](nickname)
+    - [Jefferson](nickname)
+    - [Elena](nickname)
+    - [Gissela](nickname)
+    - [Pedro](nickname)
+    # Ejemplos originales de 'inform'
+    - son [2](number)
+    - [3](number)
+    - para [5 personas](number)
+    - es de tipo [profesional](residencia_tipo_visa)
+
+- intent: ask_general_info
+  examples: |
+    - qué servicios ofrecen
+    - en qué me pueden ayudar
+    - cuál es su horario
+    - quiero información
+
+# --- Intenciones que Inician Flujos (a menudo por botones) ---
+- intent: request_service
+  examples: |
+    - quiero un [trámite de residencia individual](service_type)
+    - necesito una [residencia grupal](service_type)
+    - [residencia individual](service_type)
+    - /request_service{"service_type": "residencia_individual"}
+    - /request_service{"service_type": "residencia_grupal"}
+
+- intent: specify_subject
+  examples: |
+    - es para [mí](subject:self)
+    - [para otra persona](subject:other)
+    - [yo mismo](subject:self)
+    - /specify_subject{"subject": "self"}
+    - /specify_subject{"subject": "other"}

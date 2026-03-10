@@ -1,0 +1,29 @@
+# Contenido para domain/components/form_identity_validation.yml
+version: "3.1"
+
+# --- Definición del Formulario Reutilizable ---
+forms:
+  identity_validation_form:
+    required_slots:
+      - cedula_ec
+
+# --- Slots Requeridos por este Componente ---
+slots:
+  cedula_ec:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: from_entity
+      entity: cedula_ec
+    - type: from_text
+      intent: provide_cedula
+
+# --- Respuestas Usadas por este Componente ---
+responses:
+  utter_ask_cedula_ec:
+    - text: "Por favor, ingrese el número de cédula para este trámite."
+
+# --- Acciones que pertenecen a este Componente ---
+actions:
+  - utter_ask_cedula_ec
+  - validate_identity_form

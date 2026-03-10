@@ -1,0 +1,120 @@
+version: "3.1"
+
+# ==============================================================================
+# CONFIGURACIÓN DE LA SESIÓN
+# ==============================================================================
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true
+
+# ==============================================================================
+# INTENCIONES (INTENTS)
+# ==============================================================================
+intents:
+  - greet
+  - goodbye
+  - affirm
+  - deny
+  - ask_general_info
+  - request_service: {use_entities: [service_type]}
+  - specify_subject: {use_entities: [subject]}
+  - provide_cedula: {use_entities: [cedula_ec]}
+  - inform: {use_entities: [number, residencia_tipo_visa, nickname]}
+  - nlu_fallback
+
+# ==============================================================================
+# ENTIDADES (ENTITIES)
+# ==============================================================================
+entities:
+  - nickname
+  - service_type
+  - subject
+  - cedula_ec
+  - number
+  - residencia_tipo_visa
+
+# ==============================================================================
+# SLOTS GLOBALES
+# ==============================================================================
+slots:
+  slot_nickname:
+    type: text
+    mappings:
+    - type: from_entity
+      entity: nickname
+  slot_tramite_type:
+    type: text
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: service_type
+  slot_tramite_subject:
+    type: text
+    mappings:
+    - type: from_entity
+      entity: subject
+  slot_legal_name:
+    type: text
+    mappings:
+    - type: custom
+  slot_completed_tramites:
+    type: list
+    mappings:
+    - type: custom
+
+# ==============================================================================
+# FORMULARIOS (FORMS)
+# ==============================================================================
+forms:
+  identity_validation_form: {}
+
+# ==============================================================================
+# RESPUESTAS GLOBALES (UTTERANCES) - VERSIÓN SIN BOTONES
+# ==============================================================================
+responses:
+  utter_greet:
+    - text: "Hola, soy el asistente virtual del consultorio jurídico. Para una experiencia más personal, si lo deseas, puedes decirme cómo te gustaría que me dirija a ti."
+  utter_goodbye:
+    - text: "Ha sido un placer ayudarte. Si necesitas algo más, no dudes en volver a contactarme. ¡Que tengas un buen día!"
+  utter_ask_nickname:
+    - text: "Claro, ¿cómo te gustaría que te llame?"
+  utter_confirm_nickname:
+    - text: "Perfecto, te llamaré {slot_nickname}."
+  utter_acknowledge_no_nickname:
+    - text: "Entendido. Continuemos entonces."
+  
+  # --- RESPUESTA MODIFICADA ---
+  utter_offer_services:
+    - text: "¿En qué puedo ayudarte hoy? Puedes solicitar un 'trámite de residencia individual' o un 'trámite de residencia grupal'."
+
+  utter_list_services:
+    - text: "Ofrecemos asistencia automatizada para trámites de residencia individual y grupal. También puedo responder preguntas generales sobre nuestros servicios."
+  
+  # --- RESPUESTA MODIFICADA ---
+  utter_what_else:
+    - text: "¿Hay algo más en lo que pueda asistirte? Puedes solicitar otro trámite o decir 'no, gracias'."
+
+  utter_tramite_completed:
+    - text: "Hemos completado exitosamente el trámite de '{slot_tramite_type}'."
+  utter_ask_rephrase:
+    - text: "No te he entendido muy bien. ¿Podrías reformular tu pregunta, por favor?"
+
+# ==============================================================================
+# ACCIONES TOTALES
+# ==============================================================================
+# La lista de acciones no necesita cambios
+actions:
+  - custom_ask_affirmation
+  - residencia_individual
+  - residencia_grupal
+  - validate_identity_form
+  - utter_greet
+  - utter_goodbye
+  - utter_ask_nickname
+  - utter_confirm_nickname
+  - utter_acknowledge_no_nickname
+  - utter_offer_services
+  - utter_list_services
+  - utter_what_else
+  - utter_tramite_completed
+  - utter_ask_rephrase

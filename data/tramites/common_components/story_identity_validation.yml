@@ -1,0 +1,15 @@
+# Contenido para data/tramites/common_components/story_identity_validation.yml
+version: "3.1"
+
+stories:
+- story: Plantilla de flujo para el formulario de validación de identidad
+  steps:
+    # La historia comienza asumiendo que el formulario ya ha sido activado.
+    - action: identity_validation_form
+    - active_loop: identity_validation_form
+    # El bot pide la cédula, y el usuario la proporciona.
+    - intent: provide_cedula
+    # El formulario se llena y se desactiva.
+    - active_loop: null
+    # Se ejecuta la acción de validación del formulario para procesar los datos.
+    - action: validate_identity_form

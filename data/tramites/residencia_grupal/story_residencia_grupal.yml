@@ -1,0 +1,49 @@
+version: "3.1"
+
+stories:
+- story: Flujo completo para un trámite de residencia grupal (ejemplo con 2 personas)
+  steps:
+  # 1. El usuario solicita el trámite de residencia grupal.
+  - intent: request_service
+    entities:
+    - service_type: "residencia_grupal"
+
+  # 2. La acción orquestadora se ejecuta por primera vez.
+  #    Como no sabe el número de miembros, su única acción será preguntar.
+  - action: residencia_grupal
+
+  # 3. El usuario responde, indicando que el grupo es de 2 personas.
+  - intent: inform
+    entities:
+    - number: "2"
+
+  # 4. El orquestador se ejecuta de nuevo. Ahora que tiene el número,
+  #    inicializa el grupo y comienza el bucle de validación para la Persona 1.
+  - action: residencia_grupal
+  - active_loop: identity_validation_form
+
+  # 5. El usuario proporciona la primera cédula.
+  - intent: provide_cedula
+    entities:
+    - cedula_ec: "1712345678"
+  - active_loop: null
+  - action: validate_identity_form # El componente de validación se ejecuta.
+
+  # 6. El orquestador se ejecuta de nuevo. Procesa la cédula de la Persona 1
+  #    y continúa el bucle, solicitando ahora los datos de la Persona 2.
+  - action: residencia_grupal
+  - active_loop: identity_validation_form
+
+  # 7. El usuario proporciona la segunda cédula.
+  - intent: provide_cedula
+    entities:
+    - cedula_ec: "0987654321"
+  - active_loop: null
+  - action: validate_identity_form # El componente de validación se ejecuta.
+
+  # 8. El orquestador se ejecuta por última vez. Procesa la cédula de la Persona 2,
+  #    verifica que el grupo está completo, confirma el éxito y limpia la memoria.
+  - action: residencia_grupal
+
+  # 9. La conversación finaliza el ciclo y pregunta qué más puede hacer.
+  - action: utter_what_else

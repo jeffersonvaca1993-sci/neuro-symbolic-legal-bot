@@ -1,0 +1,57 @@
+version: "3.1"
+
+# ==============================================================================
+# ACCIONES
+# ==============================================================================
+# Declara la acción orquestadora principal para este trámite.
+actions:
+  - residencia_grupal
+
+# ==============================================================================
+# SLOTS
+# ==============================================================================
+# Define las piezas de memoria específicas para el trámite de residencia grupal.
+slots:
+  # Almacena el número total de personas en el grupo. Se extrae de la
+  # respuesta del usuario a la pregunta inicial.
+  numero_de_miembros:
+    type: float
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: number
+
+  # Lleva la cuenta del miembro que se está procesando actualmente (ej. "persona 1", "persona 2").
+  # Es gestionado por la acción `residencia_grupal` y se usa principalmente para las respuestas al usuario.
+  miembro_actual_index:
+    type: float
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  # El "slot-contenedor". Es una lista de diccionarios donde cada diccionario representa
+  # a un solicitante y contiene su cédula, estado de validación, etc.
+  # Es el corazón de la gestión de memoria para este trámite.
+  slot_grupo_tramite:
+    type: list
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+# ==============================================================================
+# RESPUESTAS (UTTERANCES)
+# ==============================================================================
+# Define las plantillas de mensajes que el bot puede enviar y que son
+# específicas de este trámite.
+responses:
+  utter_ask_numero_de_miembros:
+    - text: "¿Cuántas personas, incluyéndole si es el caso, formarán parte del trámite?"
+
+  utter_start_grupo:
+    - text: "Perfecto. Iniciaremos la validación para un grupo de {numero_de_miembros} personas."
+
+  utter_ask_for_next_member:
+    - text: "Continuemos con la persona número {miembro_actual_index}. Por favor, ingrese su número de cédula."
+
+  utter_confirmacion_tramite_grupal:
+    - text: "¡Excelente! Hemos validado con éxito a los {numero_de_miembros} miembros del grupo."

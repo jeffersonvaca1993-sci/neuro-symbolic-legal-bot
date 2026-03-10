@@ -1,0 +1,38 @@
+# Contenido para data/global/stories_global.yml
+
+version: "3.1"
+stories:
+- story: Camino de Bienvenida 1 - El usuario proporciona el apodo inmediatamente
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - action: utter_ask_nickname
+  # La intención ahora es 'inform' con la entidad 'nickname'
+  - intent: inform
+    entities:
+    - nickname: "Jefferson"
+  - action: utter_confirm_nickname
+  - action: utter_offer_services
+
+- story: Camino de Bienvenida 2 - El usuario se niega a dar el apodo
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - action: utter_ask_nickname
+  - intent: deny
+  - action: utter_acknowledge_no_nickname
+  - action: utter_offer_services
+
+- story: Camino de Bienvenida 3 - El usuario saluda de nuevo después de dar el apodo
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - action: utter_ask_nickname
+  # La intención ahora es 'inform' con la entidad 'nickname'
+  - intent: inform
+    entities:
+    - nickname: "Ana"
+  - action: utter_confirm_nickname
+  - action: utter_offer_services
+  - intent: greet
+  - action: utter_offer_services
